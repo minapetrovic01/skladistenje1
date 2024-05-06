@@ -1,0 +1,78 @@
+Dimension Tables:
+
+Date Dimension (dim_date):
+date_key (Primary Key)
+order_date
+ORDER_DAY_MONTH
+ORDER_MONTH
+ORDER_YEAR
+ORDER_QUARTER
+Store Dimension (dim_store):
+store_key (Primary Key)
+store_id
+store_name
+phone
+email
+street
+city
+state
+zip_code
+Product Dimension (dim_product):
+product_key (Primary Key)
+product_id
+product_name
+brand_id
+category_id
+model_year
+list_price
+Staff Dimension (dim_staff):
+staff_key (Primary Key)
+staff_id
+first_name
+last_name
+email
+phone
+active
+store_id (Foreign Key referencing dim_store)
+manager_id
+Customer Dimension (dim_customer):
+customer_key (Primary Key)
+customer_id
+first_name
+last_name
+phone
+email
+street
+city
+state
+zip_code
+Category Dimension (dim_category):
+category_key (Primary Key)
+category_id
+category_name
+Brand Dimension (dim_brand):
+brand_key (Primary Key)
+brand_id
+brand_name
+Fact Table:
+
+Sales Fact Table (fact_sales):
+sales_key (Primary Key)
+order_id
+date_key (Foreign Key referencing dim_date)
+store_key (Foreign Key referencing dim_store)
+staff_key (Foreign Key referencing dim_staff)
+customer_key (Foreign Key referencing dim_customer)
+product_key (Foreign Key referencing dim_product)
+quantity
+list_price
+discount
+order_status
+required_date
+shipped_date
+In this star schema:
+
+The fact table (fact_sales) contains measures such as quantity, list_price, discount, and keys referencing dimension tables.
+Dimension tables (dim_date, dim_store, dim_product, dim_staff, dim_customer, dim_category, dim_brand) contain descriptive attributes related to dates, stores, products, staff, customers, categories, and brands.
+Each dimension table has a primary key (e.g., date_key, store_key) used to uniquely identify each record, and foreign keys establish relationships with the fact table.
+This star schema facilitates efficient querying and analysis of sales data by providing a denormalized structure optimized for OLAP (Online Analytical Processing) operations.
