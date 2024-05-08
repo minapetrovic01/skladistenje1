@@ -1,0 +1,179 @@
+CREATE TABLE customer_dim (
+    customer_dim_id NUMBER(*,0) PRIMARY KEY,
+    customer_id NUMBER(*,0),
+    date_from DATE,
+    date_to DATE,
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    phone VARCHAR(20),
+    email VARCHAR(255),
+    street VARCHAR(255),
+    city VARCHAR(255),
+    state VARCHAR(255),
+    zip_code VARCHAR(10)
+);
+
+CREATE SEQUENCE CUSTOMER_DIM_S;
+
+CREATE OR REPLACE TRIGGER CUSTOMER_DIM_ON_INSERT
+BEFORE INSERT ON CUSTOMER_DIM
+FOR EACH ROW
+BEGIN
+SELECT CUSTOMER_DIM_S.NEXTVAL
+INTO :NEW.CUSTOMER_DIM_ID
+FROM DUAL;
+END;
+
+CREATE TABLE DATE_DIM
+(
+DATE_DIM_ID NUMBER(*,0) PRIMARY KEY,
+ORDER_DATE DATE,
+ORDER_DAY_MONTH NUMBER(*,0),
+ORDER_MONTH NUMBER(*,0),
+ORDER_YEAR NUMBER(*,0),
+ORDER_QUARTER NUMBER(*,0)
+);
+CREATE SEQUENCE DATE_DIM_S;
+CREATE OR REPLACE TRIGGER date_dim_on_insert
+BEFORE INSERT ON DATE_DIM
+FOR EACH ROW
+BEGIN
+SELECT DATE_DIM_S.NEXTVAL
+INTO :NEW.DATE_DIM_ID
+FROM DUAL;
+END;
+
+
+
+CREATE TABLE staff_dim (
+    staff_dim_id NUMBER(*,0) primary key,
+    date_from date,
+    date_to date,
+    staff_id NUMBER(*,0),
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    phone VARCHAR(20)
+);
+
+
+CREATE SEQUENCE STAFF_DIM_S;
+
+CREATE OR REPLACE TRIGGER STAFF_DIM_ON_INSERT
+BEFORE INSERT ON STAFF_DIM
+FOR EACH ROW
+BEGIN
+SELECT STAFF_DIM_S.NEXTVAL
+INTO :NEW.STAFF_DIM_ID
+FROM DUAL;
+END;
+
+
+CREATE TABLE product_dim (
+    product_dim_id NUMBER(*,0) PRIMARY KEY,
+    date_from date,
+    date_to date,
+    product_id NUMBER(*,0),
+    product_name VARCHAR(255),
+    brand_id NUMBER(*,0),
+    brand_name VARCHAR(255)
+    category_id NUMBER(*,0),
+    category_name VARCHAR(255),
+    model_year NUMBER(*,0),
+    list_price DECIMAL
+);
+CREATE SEQUENCE PRODUCT_DIM_S;
+CREATE OR REPLACE TRIGGER PRODUCT_DIM_ON_INSERT
+BEFORE INSERT ON PRODUCT_DIM
+FOR EACH ROW
+BEGIN
+SELECT PRODUCT_DIM_S.NEXTVAL
+INTO :NEW.PRODUCT_DIM_ID
+FROM DUAL;
+END;
+
+
+
+
+create table order_fact
+(
+    customer_dim_id NUMBER(*,0),
+    product_dim_id NUMBER(*,0),
+    order_id NUMBER(*,0),
+    quantity NUMBER(*,0),
+    staff_dim_id NUMBER(*,0),
+    total_price DECIMAL,
+    date_dim_id NUMBER(*,0),
+    primary key (order_id,product_dim_id,customer_dim_id)
+
+);
+
+
+no_change: ${CUSTOMER_ID:equals(${CUSTOMER_ID_R}):and( 
+${FIRST_NAME:equals(${FIRST_NAME_R}):and( 
+${LAST_NAME:equals(${LAST_NAME_R}):and(             
+${STREET:equals(${STREET_R}):and(           
+${ZIP_CODE:equals(${ZIP_CODE_R}):and(           
+${CITY:equals(${CITY_R}):and(           
+${STATE:equals(${STATE_R}):and(           
+${PHONE:equals(${PHONE_R}):and(                
+${EMAIL:equals(${EMAIL_R}):and(           
+${CUSTOMER_DIM_ID:isEmpty():not()})}
+)})})})})})})})})})})})})})}
+
+
+${CUSTOMER_ID:equals(${CUSTOMER_ID_R}):and(${FIRST_NAME:equals(${FIRST_NAME_R}):and(${LAST_NAME:equals${LAST_NAME_R}:and( ${STREET:equals(${STREET_R}):and(${ZIP_CODE:equals(${ZIP_CODE_R}):and(${CITY:equals(${CITY_R}):and(${STATE:equals(${STATE_R}):and(${PHONE:equals(${PHONE_R}):and(${EMAIL:equals(${EMAIL_R}):and(${CUSTOMER_DIM_ID:isEmpty():not()})})})})})})})})})}
+
+INSERT INTO CUSTOMER_DIM (DATE_FROM, DATE_TO, CUSTOMER_ID, FIRST_NAME, LAST_NAME, STREET, ZIP_CODE, CITY, STATE, EMAIL, PHONE)  VALUES ('01-JAN-1900', NULL, ${CUSTOMER_ID}, '${FIRST_NAME}', '${LAST_NAME}', '${STREET}', '${ZIPL_CODE}', '${CITY}', '${STATE}', '${EMAIL}', '${PHONE}')
+
+no_change: ${STAFF_ID:equals(${STAFF_ID_R}):and(
+${FIRST_NAME:equals(${FIRST_NAME_R}):and(
+${LAST_NAME:equals(${LAST_NAME_R}):and(
+${EMAIL:equals(${EMAIL_R}):and( ${PHONE:equals(${PHONE_R}):and(${CUSTOMER_DIM_ID:isEmpty():not()})}
+)})})})}
+
+INSERT INTO STAFF_DIM (DATE_FROM, DATE_TO, STAFF_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE)
+VALUES ('01-JAN-1900', NULL, ${STAFF_ID}, '${FIRST_NAME}', '${LAST_NAME}', '${EMAIL}', '${PHONE}')
+
+${PRODUCT_ID:equals(${PRODUCT_ID_R}):and(
+${PRODUCT_NAME:equals(${PRODUCT_NAME_R}):and(
+${BRAND_ID:equals(${BRAND_ID_R}):and(
+${CATEGORY_ID:equals(${CATEGORY_ID_R}):and(
+${MODEL_YEAR:equals(${MODEL_YEAR_R}):and(
+${LIST_PRICE:equals(${LIST_PRICE_R}):and(
+${BRAND_NAME:equals(${BRAND_NAME_R}):and(
+${CATEGORY_NAME:equals(${CATEGORY_NAME_R}):and(${PRODUCT_DIM_ID:isEmpty():not()})}
+)})})})})})})}
+
+
+INSERT INTO PRODUCT_DIM (DATE_FROM, DATE_TO, PRODUCT_ID, PRODUCT_NAME, BRAND_ID, CATEGORY_ID, MODEL_YEAR, LIST_PRICE, CATEGORY_NAME, BRAND_NAME)
+VALUES ('01-JAN-1900', NULL, ${PRODUCT_ID}, '${PRODUCT_NAME}', '${BRAND_ID}', '${CATEGORY_ID}', '${MODEL_YEAR}', '${LIST_PRICE}', '${CATEGORY_NAME}', '${BRAND_NAME}')
+
+
+SELECT 
+    oi.quantity,
+    oi.order_id,
+    oi.product_id,
+    o.customer_id,
+    o.staff_id,
+    to_char(o.order_date, 'yyyy-mm-dd') AS order_date,
+    oi.quantity*oi.discount*oi.list_price as total_price
+FROM 
+    order_item oi
+JOIN 
+    orders o ON oi.order_id = o.order_id
+
+
+${CUSTOMER_DIM_ID_R:isEmpty():and(${PRODUCT_DIM_ID_R:isEmpty():and(${ORDER_ID_R:isEmpty():and(${CUSTOMER_DIM_ID:isEmpty():not():and(${PRODUCT_DIM_ID:isEmpty():not()})})})})}
+
+
+
+INSERT INTO ORDER_FACT VALUES (${CUSTOMER_DIM_ID}, ${PRODUCT_DIM_ID}, ${ORDER_ID}, ${QUANTITY},${STAFF_DIM_ID}, ${TOTAL_PRICE}, ${DATE_DIM_ID})
+
+
+INSERT INTO CUSTOMER_DIM (DATE_FROM, DATE_TO, CUSTOMER_ID, 
+FIRST_NAME, LAST_NAME, STREET, ZIP_CODE, CITY, 
+STATE, EMAIL, PHONE)  
+VALUES ('01-JAN-1900', NULL, ${CUSTOMER_ID}, '${FIRST_NAME}', 
+'${LAST_NAME}', '${STREET}', '${ZIPL_CODE}', '${CITY}', 
+'${STATE}', '${EMAIL}', '${PHONE}')
